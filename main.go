@@ -63,14 +63,12 @@ func main() {
 }
 
 func processStats(stats []string) {
-	// Load Average
 	if loadAvg, err := strconv.ParseFloat(stats[0], 64); err == nil {
 		if loadAvg > 30 {
 			fmt.Printf("Load Average is too high: %.0f\n", loadAvg)
 		}
 	}
 
-	// Memory usage
 	memTotal, err1 := strconv.ParseUint(stats[1], 10, 64)
 	memUsed, err2 := strconv.ParseUint(stats[2], 10, 64)
 	if err1 == nil && err2 == nil && memTotal > 0 {
@@ -80,7 +78,6 @@ func processStats(stats []string) {
 		}
 	}
 
-	// Disk space
 	diskTotal, err1 := strconv.ParseUint(stats[3], 10, 64)
 	diskUsed, err2 := strconv.ParseUint(stats[4], 10, 64)
 	if err1 == nil && err2 == nil && diskTotal > 0 {
@@ -91,15 +88,13 @@ func processStats(stats []string) {
 		}
 	}
 
-	// Network bandwidth - ИСПРАВЛЕННЫЙ РАСЧЕТ
 	netTotal, err1 := strconv.ParseUint(stats[5], 10, 64)
 	netUsed, err2 := strconv.ParseUint(stats[6], 10, 64)
 	if err1 == nil && err2 == nil && netTotal > 0 {
 		netUsagePercent := (netUsed * 100) / netTotal
 		if netUsagePercent > 90 {
 			availableBandwidthBytes := netTotal - netUsed
-			// Байты/сек → Мегабиты/сек: / (1024*1024) для мегабайт, затем * 8 для бит
-			availableBandwidthMbit := availableBandwidthBytes / (1024 * 1024) * 8
+			availableBandwidthMbit := availableBandwidthBytes / 131072
 			fmt.Printf("Network bandwidth usage high: %d Mbit/s available\n", availableBandwidthMbit)
 		}
 	}
