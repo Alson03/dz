@@ -94,7 +94,7 @@ func processStats(stats []string) {
 		netUsagePercent := (netUsed * 100) / netTotal
 		if netUsagePercent > 90 {
 			availableBandwidthBytes := netTotal - netUsed
-			availableBandwidthMbit := availableBandwidthBytes / (1024 * 1024 * 8)
+			availableBandwidthMbit := availableBandwidthBytes / 131072
 			fmt.Printf("Network bandwidth usage high: %d Mbit/s available\n", availableBandwidthMbit)
 		}
 	}
