@@ -101,4 +101,4 @@ func processStats(stats []string) {
 			fmt.Printf("Network bandwidth usage high: %.2f Mbit/s available\n", availableBandwidthMbit)
 		}
 	}
-}
+} 
