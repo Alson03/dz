@@ -72,16 +72,16 @@ func processStats(stats []string) {
 	memTotal, err1 := strconv.ParseUint(stats[1], 10, 64)
 	memUsed, err2 := strconv.ParseUint(stats[2], 10, 64)
 	if err1 == nil && err2 == nil && memTotal > 0 {
-		memUsagePercent := float64(memUsed) / float64(memTotal) * 100
+		memUsagePercent := (memUsed * 100) / memTotal
 		if memUsagePercent > 80 {
-			fmt.Printf("Memory usage too high: %.0f%%\n", memUsagePercent)
+			fmt.Printf("Memory usage too high: %d%%\n", memUsagePercent)
 		}
 	}
 
 	diskTotal, err1 := strconv.ParseUint(stats[3], 10, 64)
 	diskUsed, err2 := strconv.ParseUint(stats[4], 10, 64)
 	if err1 == nil && err2 == nil && diskTotal > 0 {
-		diskUsagePercent := float64(diskUsed) / float64(diskTotal) * 100
+		diskUsagePercent := (diskUsed * 100) / diskTotal
 		if diskUsagePercent > 90 {
 			freeSpaceMB := (diskTotal - diskUsed) / (1024 * 1024)
 			fmt.Printf("Free disk space is too low: %d Mb left\n", freeSpaceMB)
@@ -91,10 +91,10 @@ func processStats(stats []string) {
 	netTotal, err1 := strconv.ParseUint(stats[5], 10, 64)
 	netUsed, err2 := strconv.ParseUint(stats[6], 10, 64)
 	if err1 == nil && err2 == nil && netTotal > 0 {
-		netUsagePercent := float64(netUsed) / float64(netTotal) * 100
+		netUsagePercent := (netUsed * 100) / netTotal
 		if netUsagePercent > 90 {
 			availableBandwidthBytes := netTotal - netUsed
-			availableBandwidthMbit := availableBandwidthBytes / 1048576
+			availableBandwidthMbit := availableBandwidthBytes / 125000
 			fmt.Printf("Network bandwidth usage high: %d Mbit/s available\n", availableBandwidthMbit)
 		}
 	}
