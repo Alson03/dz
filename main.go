@@ -91,14 +91,15 @@ func processStats(stats []string) {
 		}
 	}
 
-	// Network bandwidth
+	// Network bandwidth - ИСПРАВЛЕННЫЙ РАСЧЕТ
 	netTotal, err1 := strconv.ParseUint(stats[5], 10, 64)
 	netUsed, err2 := strconv.ParseUint(stats[6], 10, 64)
 	if err1 == nil && err2 == nil && netTotal > 0 {
 		netUsagePercent := (netUsed * 100) / netTotal
 		if netUsagePercent > 90 {
 			availableBandwidthBytes := netTotal - netUsed
-			availableBandwidthMbit := availableBandwidthBytes * 8 / (1000 * 1000)
+			// Байты/сек → Мегабиты/сек: / (1024*1024) для мегабайт, затем * 8 для бит
+			availableBandwidthMbit := availableBandwidthBytes / (1024 * 1024) * 8
 			fmt.Printf("Network bandwidth usage high: %d Mbit/s available\n", availableBandwidthMbit)
 		}
 	}
