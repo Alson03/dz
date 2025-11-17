@@ -17,31 +17,41 @@ func main() {
 		resp, err := http.Get(serverURL)
 		if err != nil {
 			errorCount++
-			fmt.Printf("Error making request: %v\n", err)
-		} else {
-			if resp.StatusCode != http.StatusOK {
-				errorCount++
-				fmt.Printf("Server returned non-200 status: %d\n", resp.StatusCode)
-			} else {
-				scanner := bufio.NewScanner(resp.Body)
-				if scanner.Scan() {
-					data := scanner.Text()
-					stats := strings.Split(data, ",")
-					
-					if len(stats) >= 7 {
-						processStats(stats)
-						errorCount = 0
-					} else {
-						errorCount++
-						fmt.Printf("Invalid data format: %s\n", data)
-					}
-				} else {
-					errorCount++
-					fmt.Println("Empty response body")
-				}
-				resp.Body.Close()
+			if errorCount >= 3 {
+				fmt.Println("Unable to fetch server statistic")
+				errorCount = 0
 			}
+			time.Sleep(10 * time.Second)
+			continue
 		}
+		
+		if resp.StatusCode != http.StatusOK {
+			errorCount++
+			resp.Body.Close()
+			if errorCount >= 3 {
+				fmt.Println("Unable to fetch server statistic")
+				errorCount = 0
+			}
+			time.Sleep(10 * time.Second)
+			continue
+		}
+		
+		scanner := bufio.NewScanner(resp.Body)
+		if scanner.Scan() {
+			data := scanner.Text()
+			stats := strings.Split(data, ",")
+			
+			if len(stats) >= 7 {
+				processStats(stats)
+				errorCount = 0
+			} else {
+				errorCount++
+			}
+		} else {
+			errorCount++
+		}
+		
+		resp.Body.Close()
 		
 		if errorCount >= 3 {
 			fmt.Println("Unable to fetch server statistic")
@@ -53,11 +63,14 @@ func main() {
 }
 
 func processStats(stats []string) {
-	loadAvg, err := strconv.ParseFloat(stats[0], 64)
-	if err == nil && loadAvg > 30 {
-		fmt.Printf("Load Average is too high: %.2f\n", loadAvg)
+	// Load Average
+	if loadAvg, err := strconv.ParseFloat(stats[0], 64); err == nil {
+		if loadAvg > 30 {
+			fmt.Printf("Load Average is too high: %.2f\n", loadAvg)
+		}
 	}
 	
+	// Memory usage
 	memTotal, err1 := strconv.ParseUint(stats[1], 10, 64)
 	memUsed, err2 := strconv.ParseUint(stats[2], 10, 64)
 	if err1 == nil && err2 == nil && memTotal > 0 {
@@ -67,6 +80,7 @@ func processStats(stats []string) {
 		}
 	}
 	
+	// Disk space
 	diskTotal, err1 := strconv.ParseUint(stats[3], 10, 64)
 	diskUsed, err2 := strconv.ParseUint(stats[4], 10, 64)
 	if err1 == nil && err2 == nil && diskTotal > 0 {
@@ -77,12 +91,13 @@ func processStats(stats []string) {
 		}
 	}
 	
+	// Network bandwidth
 	netTotal, err1 := strconv.ParseUint(stats[5], 10, 64)
 	netUsed, err2 := strconv.ParseUint(stats[6], 10, 64)
 	if err1 == nil && err2 == nil && netTotal > 0 {
 		netUsagePercent := float64(netUsed) / float64(netTotal) * 100
 		if netUsagePercent > 90 {
-			availableBandwidthMbit := float64(netTotal-netUsed) * 8 / 1024 / 1024
+			availableBandwidthMbit := float64(netTotal-netUsed) * 8 / 1000000
 			fmt.Printf("Network bandwidth usage high: %.2f Mbit/s available\n", availableBandwidthMbit)
 		}
 	}
