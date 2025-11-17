@@ -12,7 +12,7 @@ import (
 func main() {
 	serverURL := "http://srv.msk01.gigacorp.local/_stats"
 	errorCount := 0
-	
+
 	for {
 		resp, err := http.Get(serverURL)
 		if err != nil {
@@ -24,7 +24,7 @@ func main() {
 			time.Sleep(10 * time.Second)
 			continue
 		}
-		
+
 		if resp.StatusCode != http.StatusOK {
 			errorCount++
 			resp.Body.Close()
@@ -35,12 +35,12 @@ func main() {
 			time.Sleep(10 * time.Second)
 			continue
 		}
-		
+
 		scanner := bufio.NewScanner(resp.Body)
 		if scanner.Scan() {
 			data := scanner.Text()
 			stats := strings.Split(data, ",")
-			
+
 			if len(stats) >= 7 {
 				processStats(stats)
 				errorCount = 0
@@ -50,14 +50,14 @@ func main() {
 		} else {
 			errorCount++
 		}
-		
+
 		resp.Body.Close()
-		
+
 		if errorCount >= 3 {
 			fmt.Println("Unable to fetch server statistic")
 			errorCount = 0
 		}
-		
+
 		time.Sleep(10 * time.Second)
 	}
 }
@@ -69,7 +69,7 @@ func processStats(stats []string) {
 			fmt.Printf("Load Average is too high: %.2f\n", loadAvg)
 		}
 	}
-	
+
 	// Memory usage
 	memTotal, err1 := strconv.ParseUint(stats[1], 10, 64)
 	memUsed, err2 := strconv.ParseUint(stats[2], 10, 64)
@@ -79,7 +79,7 @@ func processStats(stats []string) {
 			fmt.Printf("Memory usage too high: %.2f%%\n", memUsagePercent)
 		}
 	}
-	
+
 	// Disk space
 	diskTotal, err1 := strconv.ParseUint(stats[3], 10, 64)
 	diskUsed, err2 := strconv.ParseUint(stats[4], 10, 64)
@@ -90,7 +90,7 @@ func processStats(stats []string) {
 			fmt.Printf("Free disk space is too low: %.2f Mb left\n", freeSpaceMB)
 		}
 	}
-	
+
 	// Network bandwidth
 	netTotal, err1 := strconv.ParseUint(stats[5], 10, 64)
 	netUsed, err2 := strconv.ParseUint(stats[6], 10, 64)
